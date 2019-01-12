@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jt.sys.dao.SysRoleDao">
+
+    <!-- 查询角色id,name -->
+    <select id="findObjects"
+            resultType="com.jt.common.vo.CheckBox">
+           select id,name
+           from sys_roles
+    </select>
+    
+
+    <!-- 更新角色自身信息 -->
+    <update id="updateObject" parameterType="com.jt.sys.entity.SysRole">
+           update sys_roles
+           <set>
+            <if test="name!=null and name!=''">
+             name=#{name},
+            </if>
+            <if test="note!=null and note!=''">
+             note=#{note},
+            </if>
+            <if test="modifiedUser!=null and modifiedUser!=''">
+             modifiedUser=#{modifiedUser},
+            </if>
+             modifiedTime=now()
+           </set>
+            where id=#{id}
+     </update>
+    <!-- 基于角色id查询角色自身信息 -->
+    <select id="findObjectById"
+            resultType="com.jt.sys.entity.SysRole">
+           select *
+           from sys_roles
+           where id=#{id}        
+    </select>
+
+    <!-- 向角色表中写入角色自身信息 
+         useGeneratedKeys 表示要使用写到数据库表中的自增长主键值
+         keyProperty 将自增长的主键值,赋值给参数SysRole的id属性-->
+    <insert id="insertObject"
+            parameterType="com.jt.sys.entity.SysRole"
+            useGeneratedKeys="true"
+            keyProperty="id">
+         insert into sys_roles 
+         (name,note,createdTime,modifiedTime,
+         createdUser,modifiedUser) 
+         values
+         (#{name},#{note},now(),now(),
+         #{createdUser},#{modifiedUser})
+    </insert>
+
+   <!--基于id删除角色自身信息 -->
+    <delete id="deleteObject"
+            parameterType="int">
+         delete 
+         from sys_roles
+         where id=#{id}        
+    </delete>
+   
+   <!-- mybatis中使用sql标签定义共性sql元素
+        其它元素中用到了可以借助include直接引入 -->
+   <sql id="queryWhereId">
+        <where>
+            <if test="name!=null and name!=''">
+             name like concat("%",#{name},"%")
+            </if>
+        </where>  
+   </sql>
+   <select id="getRowCount"
+           resultType="int">
+           select count(*)
+           from sys_roles  
+           <include refid="queryWhereId"/>  
+   </select>
+  
+   <select id="findPageObjects"
+           resultType="com.jt.sys.entity.SysRole">
+         select *
+         from sys_roles
+         <include refid="queryWhereId"/>  
+         order by createdTime desc
+         limit #{startIndex},#{pageSize}       
+   </select>
+   
+</mapper>
+
+
+
